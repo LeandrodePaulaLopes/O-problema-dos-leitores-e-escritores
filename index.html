@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Problema dos Leitores e Escritores</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            padding: 28px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        header h1 {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: #dbeafe;
+            font-size: 15px;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1400px;
+            margin: 25px auto;
+        }
+
+        /* CONTROLES */
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 12px 18px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn-reader {
+            background: #22c55e;
+            color: #052e16;
+        }
+
+        .btn-writer {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-start {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-reset {
+            background: #64748b;
+            color: white;
+        }
+
+        /* DASHBOARD */
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        .card h3 {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .number {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .green {
+            color: #4ade80;
+        }
+
+        .red {
+            color: #f87171;
+        }
+
+        .yellow {
+            color: #facc15;
+        }
+
+        .blue {
+            color: #60a5fa;
+        }
+
+        /* BANCO */
+
+        .database {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .database h2 {
+            margin-bottom: 20px;
+        }
+
+        .database-box {
+            width: 260px;
+            margin: auto;
+            padding: 30px 20px;
+            border-radius: 15px;
+            background: #0f172a;
+            border: 3px solid #475569;
+            transition: 0.3s;
+        }
+
+        .database-box.reading {
+            border-color: #22c55e;
+            box-shadow: 0 0 25px rgba(34,197,94,0.3);
+        }
+
+        .database-box.writing {
+            border-color: #ef4444;
+            box-shadow: 0 0 30px rgba(239,68,68,0.4);
+        }
+
+        .database-icon {
+            font-size: 55px;
+            margin-bottom: 10px;
+        }
+
+        .database-status {
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        /* LAYOUT */
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .panel h2 {
+            margin-bottom: 18px;
+            font-size: 19px;
+        }
+
+        /* PROCESSOS */
+
+        .process-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .process {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 13px;
+            background: #0f172a;
+            border-radius: 10px;
+            border-left: 5px solid #64748b;
+        }
+
+        .process.reader {
+            border-left-color: #22c55e;
+        }
+
+        .process.writer {
+            border-left-color: #ef4444;
+        }
+
+        .process-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .process-icon {
+            font-size: 24px;
+        }
+
+        .process-name {
+            font-weight: bold;
+        }
+
+        .process-type {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .status {
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .status.waiting {
+            background: #422006;
+            color: #fbbf24;
+        }
+
+        .status.active {
+            background: #052e16;
+            color: #4ade80;
+        }
+
+        .status.writing {
+            background: #450a0a;
+            color: #f87171;
+        }
+
+        .status.finished {
+            background: #1e293b;
+            color: #94a3b8;
+        }
+
+        /* LOG */
+
+        .log {
+            background: #020617;
+            border-radius: 10px;
+            padding: 15px;
+            height: 420px;
+            overflow-y: auto;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+        }
+
+        .log-line {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .log-time {
+            color: #64748b;
+        }
+
+        .log-reader {
+            color: #4ade80;
+        }
+
+        .log-writer {
+            color: #f87171;
+        }
+
+        .log-system {
+            color: #60a5fa;
+        }
+
+        /* LEGENDA */
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            color: #cbd5e1;
+            font-size: 13px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+        }
+
+        .dot.green {
+            background: #22c55e;
+        }
+
+        .dot.red {
+            background: #ef4444;
+        }
+
+        .dot.yellow {
+            background: #facc15;
+        }
+
+        /* RESPONSIVO */
+
+        @media (max-width: 900px) {
+            .dashboard {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 23px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>✈️ Problema dos Leitores e Escritores</h1>
+    <p>Simulação de acesso concorrente ao banco de dados de reservas aéreas</p>
+</header>
+
+<div class="container">
+
+    <!-- CONTROLES -->
+
+    <div class="controls">
+        <button class="btn-reader" onclick="addProcess('reader')">
+            + Adicionar Leitor
+        </button>
+
+        <button class="btn-writer" onclick="addProcess('writer')">
+            + Adicionar Escritor
+        </button>
+
+        <button class="btn-start" onclick="startSimulation()">
+            ▶ Iniciar Simulação
+        </button>
+
+        <button class="btn-reset" onclick="resetSimulation()">
+            ↻ Reiniciar
+        </button>
+    </div>
+
+    <!-- DASHBOARD -->
+
+    <div class="dashboard">
+
+        <div class="card">
+            <h3>Leitores ativos</h3>
+            <div id="activeReaders" class="number green">0</div>
+        </div>
+
+        <div class="card">
+            <h3>Escritores ativos</h3>
+            <div id="activeWriters" class="number red">0</div>
+        </div>
+
+        <div class="card">
+            <h3>Processos aguardando</h3>
+            <div id="waiting" class="number yellow">0</div>
+        </div>
+
+        <div class="card">
+            <h3>Processos concluídos</h3>
+            <div id="finished" class="number blue">0</div>
+        </div>
+
+    </div>
+
+    <!-- BANCO DE DADOS -->
+
+    <div class="database">
+
+        <h2>🗄️ Banco de Dados — Reservas Aéreas</h2>
+
+        <div id="databaseBox" class="database-box">
+
+            <div class="database-icon">🗄️</div>
+
+            <div id="databaseStatus" class="database-status">
+                Banco disponível
+            </div>
+
+            <p style="margin-top: 8px; color:#94a3b8;">
+                Sistema de reservas
+            </p>
+
+        </div>
+
+        <div class="legend">
+
+            <div class="legend-item">
+                <div class="dot green"></div>
+                Leitura permitida simultaneamente
+            </div>
+
+            <div class="legend-item">
+                <div class="dot red"></div>
+                Escrita exclusiva
+            </div>
+
+            <div class="legend-item">
+                <div class="dot yellow"></div>
+                Processo aguardando
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- PROCESSOS + LOG -->
+
+    <div class="main-grid">
+
+        <div class="panel">
+
+            <h2>👥 Processos</h2>
+
+            <div id="processList" class="process-list">
+                <p style="color:#64748b;">
+                    Nenhum processo criado.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="panel">
+
+            <h2>📋 Log da Simulação</h2>
+
+            <div id="log" class="log">
+                <div class="log-line log-system">
+                    [SISTEMA] Aguardando processos...
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    let processes = [];
+
+    let processId = 0;
+
+    let activeReaders = 0;
+
+    let activeWriters = 0;
+
+    let finishedProcesses = 0;
+
+    let simulationRunning = false;
+
+
+    /*
+        ADICIONA UM NOVO PROCESSO
+    */
+
+    function addProcess(type) {
+
+        processId++;
+
+        const process = {
+            id: processId,
+            type: type,
+            status: "waiting"
+        };
+
+        processes.push(process);
+
+        renderProcesses();
+
+        updateDashboard();
+
+        addLog(
+            `${type === "reader" ? "👁️ Leitor" : "✍️ Escritor"} #${process.id} entrou na fila.`,
+            type
+        );
+    }
+
+
+    /*
+        RENDERIZA A LISTA DE PROCESSOS
+    */
+
+    function renderProcesses() {
+
+        const list = document.getElementById("processList");
+
+        list.innerHTML = "";
+
+        if (processes.length === 0) {
+
+            list.innerHTML =
+                `<p style="color:#64748b;">Nenhum processo criado.</p>`;
+
+            return;
+        }
+
+        processes.forEach(process => {
+
+            const element = document.createElement("div");
+
+            element.className =
+                `process ${process.type}`;
+
+            let icon =
+                process.type === "reader" ? "👁️" : "✍️";
+
+            let typeName =
+                process.type === "reader"
+                    ? "Leitor"
+                    : "Escritor";
+
+            let statusText = "";
+
+            if (process.status === "waiting")
+                statusText = "Aguardando";
+
+            if (process.status === "active")
+                statusText = "Lendo";
+
+            if (process.status === "writing")
+                statusText = "Escrevendo";
+
+            if (process.status === "finished")
+                statusText = "Concluído";
+
+            element.innerHTML = `
+
+                <div class="process-info">
+
+                    <div class="process-icon">
+                        ${icon}
+                    </div>
+
+                    <div>
+                        <div class="process-name">
+                            ${typeName} #${process.id}
+                        </div>
+
+                        <div class="process-type">
+                            Processo concorrente
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="status ${process.status}">
+                    ${statusText}
+                </div>
+            `;
+
+            list.appendChild(element);
+        });
+    }
+
+
+    /*
+        ATUALIZA OS CONTADORES
+    */
+
+    function updateDashboard() {
+
+        document.getElementById("activeReaders")
+            .textContent = activeReaders;
+
+        document.getElementById("activeWriters")
+            .textContent = activeWriters;
+
+        const waitingProcesses =
+            processes.filter(p => p.status === "waiting").length;
+
+        document.getElementById("waiting")
+            .textContent = waitingProcesses;
+
+        document.getElementById("finished")
+            .textContent = finishedProcesses;
+    }
+
+
+    /*
+        ATUALIZA O BANCO DE DADOS
+    */
+
+    function updateDatabase() {
+
+        const box =
+            document.getElementById("databaseBox");
+
+        const status =
+            document.getElementById("databaseStatus");
+
+        box.classList.remove("reading", "writing");
+
+        if (activeWriters > 0) {
+
+            box.classList.add("writing");
+
+            status.textContent =
+                "🔴 Escritor atualizando o banco";
+
+        } else if (activeReaders > 0) {
+
+            box.classList.add("reading");
+
+            status.textContent =
+                "🟢 Leitores acessando o banco";
+
+        } else {
+
+            status.textContent =
+                "Banco disponível";
+        }
+    }
+
+
+    /*
+        LOG
+    */
+
+    function addLog(message, type = "system") {
+
+        const log =
+            document.getElementById("log");
+
+        const time =
+            new Date().toLocaleTimeString();
+
+        let className = "log-system";
+
+        if (type === "reader")
+            className = "log-reader";
+
+        if (type === "writer")
+            className = "log-writer";
+
+        const line =
+            document.createElement("div");
+
+        line.className =
+            `log-line ${className}`;
+
+        line.innerHTML =
+            `<span class="log-time">[${time}]</span> ${message}`;
+
+        log.appendChild(line);
+
+        log.scrollTop = log.scrollHeight;
+    }
+
+
+    /*
+        EXECUTA UM LEITOR
+    */
+
+    function executeReader(process) {
+
+        /*
+            Se houver escritor ativo,
+            o leitor precisa esperar.
+        */
+
+        if (activeWriters > 0) {
+
+            addLog(
+                `👁️ Leitor #${process.id} aguardando: existe um escritor ativo.`,
+                "reader"
+            );
+
+            return false;
+        }
+
+        process.status = "active";
+
+        activeReaders++;
+
+        renderProcesses();
+
+        updateDashboard();
+
+        updateDatabase();
+
+        addLog(
+            `🟢 Leitor #${process.id} começou a ler o banco.`,
+            "reader"
+        );
+
+        /*
+            O leitor permanece acessando
+            durante 2 segundos.
+        */
+
+        setTimeout(() => {
+
+            activeReaders--;
+
+            process.status = "finished";
+
+            finishedProcesses++;
+
+            renderProcesses();
+
+            updateDashboard();
+
+            updateDatabase();
+
+            addLog(
+                `✅ Leitor #${process.id} terminou a leitura.`,
+                "reader"
+            );
+
+            processNext();
+
+        }, 2000);
+
+        return true;
+    }
+
+
+    /*
+        EXECUTA UM ESCRITOR
+    */
+
+    function executeWriter(process) {
+
+        /*
+            Escritor só pode entrar se
+            NÃO houver leitores nem escritores.
+        */
+
+        if (
+            activeReaders > 0 ||
+            activeWriters > 0
+        ) {
+
+            addLog(
+                `✍️ Escritor #${process.id} aguardando: banco ocupado.`,
+                "writer"
+            );
+
+            return false;
+        }
+
+        process.status = "writing";
+
+        activeWriters++;
+
+        renderProcesses();
+
+        updateDashboard();
+
+        updateDatabase();
+
+        addLog(
+            `🔴 Escritor #${process.id} obteve acesso exclusivo ao banco.`,
+            "writer"
+        );
+
+        /*
+            Escrita dura 3 segundos.
+        */
+
+        setTimeout(() => {
+
+            activeWriters--;
+
+            process.status = "finished";
+
+            finishedProcesses++;
+
+            renderProcesses();
+
+            updateDashboard();
+
+            updateDatabase();
+
+            addLog(
+                `✅ Escritor #${process.id} terminou a atualização.`,
+                "writer"
+            );
+
+            processNext();
+
+        }, 3000);
+
+        return true;
+    }
+
+
+    /*
+        ESCOLHE O PRÓXIMO PROCESSO
+    */
+
+    function processNext() {
+
+        if (!simulationRunning)
+            return;
+
+        /*
+            Se já existe escritor, não pode
+            entrar mais ninguém.
+        */
+
+        if (activeWriters > 0)
+            return;
+
+        /*
+            Primeiro verificamos se existe
+            escritor aguardando.
+
+            Isso demonstra a regra de
+            exclusividade do escritor.
+        */
+
+        const waitingWriter =
+            processes.find(
+                p =>
+                    p.type === "writer" &&
+                    p.status === "waiting"
+            );
+
+        /*
+            Se houver leitores ativos,
+            o escritor precisa esperar.
+        */
+
+        if (
+            waitingWriter &&
+            activeReaders > 0
+        ) {
+
+            /*
+                Os leitores atuais continuam.
+                O escritor será executado
+                quando todos terminarem.
+            */
+
+            return;
+        }
+
+        /*
+            Se não existem leitores,
+            podemos iniciar o escritor.
+        */
+
+        if (waitingWriter) {
+
+            executeWriter(waitingWriter);
+
+            return;
+        }
+
+        /*
+            Não havendo escritor aguardando,
+            vários leitores podem entrar
+            simultaneamente.
+        */
+
+        const waitingReaders =
+            processes.filter(
+                p =>
+                    p.type === "reader" &&
+                    p.status === "waiting"
+            );
+
+        waitingReaders.forEach(reader => {
+
+            if (activeWriters === 0) {
+
+                executeReader(reader);
+
+            }
+
+        });
+    }
+
+
+    /*
+        INICIA A SIMULAÇÃO
+    */
+
+    function startSimulation() {
+
+        if (simulationRunning) {
+
+            addLog(
+                "⚠️ A simulação já está em execução."
+            );
+
+            return;
+        }
+
+        if (processes.length === 0) {
+
+            addLog(
+                "⚠️ Adicione pelo menos um processo."
+            );
+
+            return;
+        }
+
+        simulationRunning = true;
+
+        addLog(
+            "🚀 Simulação iniciada.",
+            "system"
+        );
+
+        addLog(
+            "📌 Regra: vários leitores podem ler simultaneamente.",
+            "system"
+        );
+
+        addLog(
+            "📌 Regra: escritor precisa de acesso exclusivo.",
+            "system"
+        );
+
+        processNext();
+    }
+
+
+    /*
+        REINICIA TUDO
+    */
+
+    function resetSimulation() {
+
+        processes = [];
+
+        processId = 0;
+
+        activeReaders = 0;
+
+        activeWriters = 0;
+
+        finishedProcesses = 0;
+
+        simulationRunning = false;
+
+        renderProcesses();
+
+        updateDashboard();
+
+        updateDatabase();
+
+        document.getElementById("log").innerHTML = `
+            <div class="log-line log-system">
+                [SISTEMA] Simulação reiniciada.
+            </div>
+        `;
+    }
+
+
+    /*
+        ADICIONA PROCESSOS DE EXEMPLO
+        AO CARREGAR A PÁGINA
+    */
+
+    window.onload = function() {
+
+        addProcess("reader");
+        addProcess("reader");
+        addProcess("writer");
+        addProcess("reader");
+        addProcess("writer");
+
+    };
+
+</script>
+
+</body>
+</html>
